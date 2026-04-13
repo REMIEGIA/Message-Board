@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Message Board</title>
+</head>
+<body>
+
+<h2>Message Board</h2>
+
+<input id="title" placeholder="Title">
+<input id="content" placeholder="Content">
+<button onclick="addPost()">Post</button>
+
+<div id="posts"></div>
+
+<button onclick="logout()">Logout</button>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-app.js";
+import { 
+  getAuth, onAuthStateChanged, signOut 
+} from "https://www.gstatic.com/firebasejs/10.12.4/firebase-auth.js";
+
+import {
+  getFirestore, collection, addDoc, getDocs,
+  deleteDoc, doc, updateDoc
+} from "https://www.gstatic.com/firebasejs/10.12.4/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "YOUR_KEY",
+  authDomain: "YOUR_PROJECT.firebaseapp.com",
+  projectId: "YOUR_PROJECT",
+  storageBucket: "YOUR_PROJECT.appspot.com",
+  messagingSenderId: "XXXX",
+  appId: "XXXX"
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+
+// 🔐 Protect page
+onAuthStateChanged(auth, user => {
+  if (!user) window.location.href="index.html";
+});
+
+// ➕ CREATE
+window.addPost = async function() {
+  await addDoc(collection(db, "messages"), {
+    title: title.value,
+    content: content.value,
+    user: auth.currentUser.email,
+    created_at: new Date()
+  });
+  loadPosts();
+}
+
+// 📖 READ
+async function loadPosts() {
+  posts.innerHTML = "";
+  const querySnapshot = await getDocs(collection(db, "messages"));
+  querySnapshot.forEach(docSnap => {
+    const data = docSnap.data();
+
+    posts.innerHTML += `
+      <div>
+        <h3>${data.title}</h3>
+        <p>${data.content}</p>
+        <small>${data.user}</small>
+        <button onclick="deletePost('${docSnap.id}')">Delete</button>
+      </div>
+    `;
+  });
+}
+loadPosts();
+
+// ❌ DELETE
+window.deletePost = async function(id) {
+  await deleteDoc(doc(db, "messages", id));
+  loadPosts();
+}
+
+// 🔓 LOGOUT
+window.logout = function() {
+  signOut(auth).then(() => location.href="index.html");
+}
+</script>
+
+</body>
+</html>
