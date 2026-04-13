@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Login</title>
+</head>
+<body>
+
+<h2>Register</h2>
+<input id="regEmail" type="email">
+<input id="regPass" type="password">
+<button onclick="register()">Register</button>
+
+<h2>Login</h2>
+<input id="logEmail" type="email">
+<input id="logPass" type="password">
+<button onclick="login()">Login</button>
+
+<p id="msg"></p>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-app.js";
+import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword }
+from "https://www.gstatic.com/firebasejs/10.12.4/firebase-auth.js";
+
+const firebaseConfig = {
+  apiKey: "YOUR_KEY",
+  authDomain: "YOUR_PROJECT.firebaseapp.com",
+  projectId: "YOUR_PROJECT",
+  storageBucket: "YOUR_PROJECT.appspot.com",
+  messagingSenderId: "XXXX",
+  appId: "XXXX"
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+
+window.register = function() {
+  const email = regEmail.value;
+  const pass = regPass.value;
+
+  createUserWithEmailAndPassword(auth, email, pass)
+    .then(() => msg.innerText = "Registered!")
+    .catch(e => msg.innerText = e.message);
+}
+
+window.login = function() {
+  signInWithEmailAndPassword(auth, logEmail.value, logPass.value)
+    .then(() => window.location.href="home.html")
+    .catch(e => msg.innerText = e.message);
+}
+</script>
+
+</body>
+</html>
